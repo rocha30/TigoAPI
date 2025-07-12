@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  mocks     Mock[]
+
+  @@map("users")
+}
+
+model Mock {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  baseUrl     String?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      String
+  endpoints   Endpoint[]
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("mocks")
+}
+
+model Endpoint {
+  id         String   @id @default(cuid())
+  path       String
+  method     String
+  statusCode Int      @default(200)
+  response   Json
+  headers    Json?
+  delay      Int?     @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  mockId     String
+  mock       Mock     @relation(fields: [mockId], references: [id], onDelete: Cascade)
+
+  @@map("endpoints")
+}
