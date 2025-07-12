@@ -1,0 +1,47 @@
+services:
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: tigoapi-db
+    environment:
+      POSTGRES_DB: tigoapi
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación Node.js
+  app:
+    build: .
+    container_name: tigoapi-app
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres123@db:5432/tigoapi?schema=public"
+      JWT_SECRET: "your-super-secret-jwt-key-here-change-in-production"
+      JWT_EXPIRES_IN: "30d"
+      NODE_ENV: "development"
+      PORT: "3000"
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+    command: >
+      sh -c "
+        echo 'Esperando a que la base de datos esté lista...' &&
+        npx prisma migrate deploy &&
+        echo 'Migraciones completadas, iniciando aplicación...' &&
+        npm run dev
+      "
+
+volumes:
+  postgres_data:

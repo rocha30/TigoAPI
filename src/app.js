@@ -16,15 +16,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Basic midedleware setup
-app.use(helmet());
+// Configurar Swagger ANTES de helmet
+setupSwagger(app);
+
+app.use(helmet({
+    contentSecurityPolicy: false, // Deshabilitar CSP para que Swagger funcione
+}));
 app.use(cors({
     origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
     credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-setupSwagger(app);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

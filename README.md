@@ -2,22 +2,67 @@
 
 ## 📋 Información del Proyecto
 - **Puerto**: 3000
-- **Base de datos**: PostgreSQL (Supabase)
+- **Base de datos**: PostgreSQL (Docker) o Supabase (manual)
 - **Documentación**: http://localhost:3000/api-docs
 
 ## 🔧 Cómo Ejecutar
+
+### 🐳 **Opción 1: Con Docker (Recomendado)**
+
+**Requisitos:** Solo Docker y Docker Compose
+
+1. **Iniciar Docker:**
+   ```bash
+   # En macOS/Windows: Abrir Docker Desktop
+   # En Linux: sudo systemctl start docker
+   ```
+
+2. **Clonar y ejecutar:**
+   ```bash
+   git clone <repo-url>
+   cd TigoAPI
+   docker-compose up --build
+   ```
+
+3. **Verificar que funciona:**
+   ```bash
+   curl http://localhost:3000/health
+   ```
+
+4. **Detener:**
+   ```bash
+   docker-compose down
+   ```
+
+> **Nota:** Si es la primera vez, Docker descargará las imágenes necesarias (puede tardar unos minutos).
+
+### 💻 **Opción 2: Instalación Manual**
+
+**Requisitos:** Node.js 18+, PostgreSQL
 
 1. **Instalar dependencias:**
    ```bash
    npm install
    ```
 
-2. **Iniciar servidor:**
+2. **Configurar .env:**
+   ```bash
+   # Copiar las variables de entorno
+   cp .env.example .env
+   # Editar .env con tu DATABASE_URL
+   ```
+
+3. **Ejecutar migraciones:**
+   ```bash
+   npx prisma migrate dev
+   ```
+
+4. **Iniciar servidor:**
    ```bash
    npm run dev
    ```
 
-3. **Verificar que funciona:**
+5. **Verificar que funciona:**
    ```bash
    curl http://localhost:3000/health
    ```
@@ -32,9 +77,9 @@ POST http://localhost:3000/api/auth/register
 Content-Type: application/json
 
 {
-  "username": "revisor",
-  "email": "revisor@test.com", 
-  "password": "password123"
+  "username": "revisor1",
+  "email": "revisor1@test.com", 
+  "password": "password1234"
 }
 ```
 
@@ -179,7 +224,35 @@ GET http://localhost:3000/mock/MOCK_ID_AQUI/users
 - `GET /api-docs` - Documentación Swagger
 
 ## 🔧 Variables de Entorno
+
+### 🐳 **Para Docker (Automático)**
+Docker Compose configura automáticamente:
+- Base de datos PostgreSQL
+- Variables de entorno
+- Migraciones de Prisma
+- Network interno
+
+### 💻 **Para instalación manual**
 El archivo `.env` está incluido para facilitar las pruebas (en producción se excluiría).
+
+## 🐳 Comandos Docker Útiles
+
+```bash
+# Iniciar servicios
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f app
+
+# Ejecutar comandos en el container
+docker-compose exec app npx prisma studio
+
+# Reiniciar solo la app
+docker-compose restart app
+
+# Limpiar todo
+docker-compose down -v
+```
 
 ## 📝 Notas Técnicas
 - **Framework**: Express.js 4.x
@@ -219,6 +292,13 @@ JWT_EXPIRES_IN=30d   # 30 días (actual)
 - **Swagger UI:** http://localhost:3000/api-docs
 - **Postman:** Importa los ejemplos de este README
 
+### 📖 **¿Qué encontrarás en Swagger?**
+- **Todos los endpoints** documentados interactivamente
+- **Esquemas de request/response** con ejemplos
+- **Autenticación JWT** configurada (botón "Authorize")
+- **Probar endpoints** directamente desde el navegador
+- **Descargar OpenAPI spec** para importar en otras herramientas
+
 ## 🚀 Próximos Pasos (Opcional)
 
 - [ ] Agregar validación de entrada más robusta
@@ -228,6 +308,29 @@ JWT_EXPIRES_IN=30d   # 30 días (actual)
 - [ ] Configurar CI/CD
 
 ## 🔧 Troubleshooting
+
+### 🐳 **Problemas con Docker**
+
+**Problema:** "Cannot connect to the Docker daemon"
+**Solución:** Asegúrate de que Docker Desktop esté ejecutándose
+
+**Problema:** "Port 3000 is already in use"
+**Solución:** 
+```bash
+# Cambiar el puerto en docker-compose.yml
+ports:
+  - "3001:3000"  # Usar puerto 3001 en lugar de 3000
+```
+
+**Problema:** "Database connection failed"
+**Solución:** 
+```bash
+# Reiniciar los servicios
+docker-compose down
+docker-compose up --build
+```
+
+### 💻 **Problemas Generales**
 
 ### Problema: "JWT expired"
 **Solución:** El token tiene 30 días de duración. Si expira, simplemente haz login nuevamente.
@@ -239,7 +342,9 @@ JWT_EXPIRES_IN=30d   # 30 días (actual)
 **Solución:** Verifica que estés usando el token en el header `Authorization: Bearer TOKEN_AQUI`
 
 ### Problema: Error de conexión a base de datos
-**Solución:** Verifica que el archivo `.env` tenga la `DATABASE_URL` correcta de Supabase.
+**Solución:** 
+- **Con Docker:** Reiniciar servicios con `docker-compose restart`
+- **Sin Docker:** Verifica que el archivo `.env` tenga la `DATABASE_URL` correcta
 
 ### Problema: "Mock not found"
 **Solución:** Primero crea un mock con POST `/mocks`, luego usa el ID devuelto en las siguientes peticiones.
