@@ -22,11 +22,11 @@
    curl http://localhost:3000/health
    ```
 
-## 👤 Usuario Demo (Pre-creado)
+## 👤 Crear Usuario para Pruebas
 
-**Para facilitar las pruebas, puede usar estas credenciales:**
+**Primero debe registrar un usuario para hacer las pruebas:**
 
-### Registro (si quiere crear nuevo usuario):
+### 1. Registro (crear nuevo usuario):
 ```json
 POST http://localhost:3000/api/auth/register
 Content-Type: application/json
@@ -38,7 +38,7 @@ Content-Type: application/json
 }
 ```
 
-### Login:
+### 2. Login (después del registro):
 ```json
 POST http://localhost:3000/api/auth/login
 Content-Type: application/json
@@ -55,11 +55,15 @@ Content-Type: application/json
 
 ## 📁 Flujo de Prueba Recomendado
 
-### 1. Autenticación
-- ✅ Registrar usuario o usar credenciales demo
-- ✅ Hacer login y obtener token JWT
+### 1. Registrar Usuario
+- ✅ Crear usuario con POST `/api/auth/register`
+- ✅ Usar las credenciales sugeridas arriba
 
-### 2. Crear Mock
+### 2. Autenticación
+- ✅ Hacer login con POST `/api/auth/login`
+- ✅ Copiar el token JWT de la respuesta
+
+### 3. Crear Mock
 ```json
 POST http://localhost:3000/api/mocks
 Authorization: Bearer TOKEN_AQUI
@@ -72,7 +76,7 @@ Content-Type: application/json
 }
 ```
 
-### 3. Crear Endpoint
+### 4. Crear Endpoint
 ```json
 POST http://localhost:3000/api/endpoints/mock/MOCK_ID_AQUI
 Authorization: Bearer TOKEN_AQUI
@@ -91,23 +95,37 @@ Content-Type: application/json
 }
 ```
 
-### 4. Probar Mock
+### 5. Probar Mock
 ```
 GET http://localhost:3000/mock/MOCK_ID_AQUI/users
 ```
 
 ## 📋 Respuestas Esperadas
 
+### Registro exitoso:
+```json
+{
+  "message": "User created successfully",
+  "user": {
+    "id": "abc123...",
+    "email": "revisor@test.com",
+    "username": "revisor",
+    "createdAt": "2025-07-11T..."
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
 ### Login exitoso:
 ```json
 {
-  "success": true,
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "message": "Login successful",
   "user": {
-    "id": 1,
+    "id": "abc123...",
     "username": "revisor",
     "email": "revisor@test.com"
-  }
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
@@ -215,7 +233,7 @@ JWT_EXPIRES_IN=30d   # 30 días (actual)
 **Solución:** El token tiene 30 días de duración. Si expira, simplemente haz login nuevamente.
 
 ### Problema: "User not found"
-**Solución:** Usa las credenciales exactas: `revisor@test.com` / `123456`
+**Solución:** Usa las credenciales exactas: `revisor@test.com` / `password123`
 
 ### Problema: "Cannot access mock"
 **Solución:** Verifica que estés usando el token en el header `Authorization: Bearer TOKEN_AQUI`
