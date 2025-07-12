@@ -96,6 +96,43 @@ Content-Type: application/json
 GET http://localhost:3000/mock/MOCK_ID_AQUI/users
 ```
 
+## 📋 Respuestas Esperadas
+
+### Login exitoso:
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "username": "revisor",
+    "email": "revisor@test.com"
+  }
+}
+```
+
+### Crear Mock exitoso:
+```json
+{
+  "id": 1,
+  "name": "API Demo",
+  "description": "Mock para pruebas",
+  "baseUrl": "https://api.example.com",
+  "userId": 1,
+  "createdAt": "2025-07-11T...",
+  "updatedAt": "2025-07-11T..."
+}
+```
+
+### Health Check:
+```json
+{
+  "status": "OK",
+  "timestamp": "2025-07-11T...",
+  "environment": "development"
+}
+```
+
 ## 🌐 Endpoints Disponibles
 
 ### Autenticación
@@ -134,6 +171,71 @@ El archivo `.env` está incluido para facilitar las pruebas (en producción se e
 - **Documentación**: Swagger
 - **Seguridad**: Helmet, CORS
 - **Validación**: express-validator
+
+## 📝 Notas para el Revisor
+
+### JWT Configuration
+- **Duración actual:** 30 días (configurable en `.env`)
+- **Algoritmo:** HS256
+- **Secret:** Configurado en `JWT_SECRET` del archivo `.env`
+
+### Base de Datos
+- **Tipo:** PostgreSQL (Supabase)
+- **ORM:** Prisma
+- **Migraciones:** Ejecutadas y sincronizadas
+
+### Autenticación
+- Todos los endpoints `/mocks/*` y `/endpoints/*` requieren autenticación
+- El endpoint `/auth/login` genera el token JWT
+- El endpoint `/auth/register` permite crear nuevos usuarios
+
+### Cambiar duración del JWT
+Si necesitas cambiar la duración del token, modifica en `.env`:
+```
+JWT_EXPIRES_IN=1h    # 1 hora
+JWT_EXPIRES_IN=7d    # 7 días
+JWT_EXPIRES_IN=30d   # 30 días (actual)
+```
+
+### Documentación API
+- **Swagger UI:** http://localhost:3000/api-docs
+- **Postman:** Importa los ejemplos de este README
+
+## 🚀 Próximos Pasos (Opcional)
+
+- [ ] Agregar validación de entrada más robusta
+- [ ] Implementar rate limiting
+- [ ] Agregar logging más detallado
+- [ ] Implementar tests unitarios
+- [ ] Configurar CI/CD
+
+## 🔧 Troubleshooting
+
+### Problema: "JWT expired"
+**Solución:** El token tiene 30 días de duración. Si expira, simplemente haz login nuevamente.
+
+### Problema: "User not found"
+**Solución:** Usa las credenciales exactas: `revisor@test.com` / `123456`
+
+### Problema: "Cannot access mock"
+**Solución:** Verifica que estés usando el token en el header `Authorization: Bearer TOKEN_AQUI`
+
+### Problema: Error de conexión a base de datos
+**Solución:** Verifica que el archivo `.env` tenga la `DATABASE_URL` correcta de Supabase.
+
+### Problema: "Mock not found"
+**Solución:** Primero crea un mock con POST `/mocks`, luego usa el ID devuelto en las siguientes peticiones.
+
+## 📁 Estructura del Proyecto
+
+```
+/src
+  /controllers
+  /middlewares
+  /models
+  /routes
+  /utils
+```
 
 ---
 **Desarrollado por**: Mario Rocha
